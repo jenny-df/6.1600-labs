@@ -35,6 +35,7 @@ class Client:
             print("Computed root_hash from proof:", node_hash)
             print("Expected root_hash from client:", self._root_hash)
 
+        # print(self._root_hash == node_hash, proof.key, proof.val)
         if self._root_hash != node_hash:
             raise Exception("Root hash mismatch")
 

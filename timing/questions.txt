@@ -1,0 +1,63 @@
+1) AES-128-GMAC is faster since it can be parellelized using hardware cuz there's a
+built in low level command called AES in modern processors and so they optimize for
+it while most processors don't have a low level command for SHA.
+
+Commands that show this:
+
+openssl speed -hmac sha256 -bytes 1000000
+openssl speed -evp aes-128-gcm -bytes 1000000
+
+2) If we just go by the number of rounds:
+
+AES-128 takes 10 rounds while AES-256 takes 14 rounds of encryption. That means that
+the latter takes 1.4 times longer.
+
+However, if we run the following commands and use them as a measurement:
+
+openssl speed -evp aes-256-gcm -bytes 100000000
+openssl speed -evp aes-128-gcm -bytes 100000000
+
+We will get 100 AES-256 in 3 sec and 128 AES-128 in 3 sec so it takes 1.28 times longer.
+
+3) According to https://en.wikipedia.org/wiki/Security_level and according to 
+https://billatnapier.medium.com/what-is-the-fastest-signing-and-verification-method-for-digital-signatures-0b2df0d61529
+and my own tests using the commands:
+
+    a) openssl speed rsa
+
+                    sign    verify    sign/s verify/s
+    rsa  512 bits 0.000046s 0.000003s  21523.3 378996.1
+    rsa 1024 bits 0.000100s 0.000006s   9980.8 157502.7
+    rsa 2048 bits 0.000680s 0.000020s   1471.5  50357.9
+    rsa 3072 bits 0.002064s 0.000042s    484.6  23865.3 <------ (fastest verify but slowest sign)
+    rsa 4096 bits 0.004600s 0.000070s    217.4  14255.7
+    rsa 7680 bits 0.042278s 0.000234s     23.7   4266.2
+    rsa 15360 bits 0.222889s 0.000911s      4.5   1097.3
+
+    b) openssl speed dsa
+
+                      sign    verify    sign/s verify/s
+    dsa  512 bits 0.000066s 0.000037s  15192.8  27173.6
+    dsa 1024 bits 0.000115s 0.000081s   8716.1  12335.7
+    dsa 2048 bits 0.000288s 0.000249s   3470.3   4015.8 <------ (slowest verify)
+
+    c) openssl speed ecdsa
+
+                                sign    verify    sign/s verify/s
+    160 bits ecdsa (secp160r1)   0.0002s   0.0002s   4683.5   4675.1
+    192 bits ecdsa (nistp192)   0.0003s   0.0003s   3800.3   3945.9
+    224 bits ecdsa (nistp224)   0.0001s   0.0001s  16312.7   7585.5
+    256 bits ecdsa (nistp256)   0.0000s   0.0001s  39703.6  13197.0 <----------- (fastest sign)
+    384 bits ecdsa (nistp384)   0.0010s   0.0009s    967.2   1162.0
+    521 bits ecdsa (nistp521)   0.0004s   0.0007s   2835.1   1459.8
+    163 bits ecdsa (nistk163)   0.0003s   0.0005s   3697.4   1880.5
+    233 bits ecdsa (nistk233)   0.0004s   0.0007s   2704.1   1367.9
+    283 bits ecdsa (nistk283)   0.0006s   0.0012s   1562.6    811.0
+    409 bits ecdsa (nistk409)   0.0011s   0.0021s    926.5    474.3
+    571 bits ecdsa (nistk571)   0.0024s   0.0047s    415.9    213.7
+    163 bits ecdsa (nistb163)   0.0003s   0.0006s   3498.3   1805.2
+    233 bits ecdsa (nistb233)   0.0004s   0.0008s   2523.7   1322.2
+    283 bits ecdsa (nistb283)   0.0007s   0.0013s   1509.3    763.2
+    409 bits ecdsa (nistb409)   0.0011s   0.0022s    877.5    449.1
+    571 bits ecdsa (nistb571)   0.0026s   0.0050s    387.7    198.8
+

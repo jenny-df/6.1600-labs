@@ -52,7 +52,6 @@ def test_2():
 
     #Start the attack
     result = problem_2b((r1,s1), (r2,s2), Hm1, Hm2)
-    
     if(result != pk):
         raise Exception("Attack key does not equal private key.")
    

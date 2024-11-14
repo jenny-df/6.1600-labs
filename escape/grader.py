@@ -9,7 +9,7 @@ def scenario_one():
     def guess(x):
         return x == secret
 
-    import attack
+    import attack 
     r = attack.attack_one(guess)
 
     if type(r) != bytes or r != secret:
@@ -20,7 +20,6 @@ def scenario_two():
 
     import attack
     r = attack.attack_two()
-
     if type(r) != bytes or r != secret:
         raise Exception("did not return correct secret")
 

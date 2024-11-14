@@ -34,6 +34,10 @@ import paramiko
 import constants
 import opts
 from auth import Server
+import logging
+
+logging.basicConfig()
+logging.getLogger("paramiko").setLevel(logging.DEBUG)
 
 VERBOSE = True
 
@@ -78,6 +82,7 @@ def do_accept(sock):
         if msg.strip() == "rm -r /":
             f.write(constants.BINGO + "\n")
         else:
+            print(msg.strip())
             f.write("No good.\n")
         f.flush()
     except EOFError:

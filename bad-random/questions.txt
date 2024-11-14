@@ -1,16 +1,62 @@
 Problem 1:
 
-B)
+B) If we want it to be secure from an efficient adversary, then we would need 
+256-bit entropy. In that case, the adversary will need 2^128 expect number of 
+brute-force guesses (using the Birthday Paradox) to get a repeat of the random 
+value and therefore, the key. If we then translate that into bytes, we get 32 
+bytes is the minimum, so the last two options (32 and 256 bytes) are the correct 
+answers.
+
 
 Problem 2:
 
-A)
+A) When two signatures are generated using the same nonce α_t and secret key α, 
+the attacker can exploit the relationships between the signatures to recover the 
+secret key. The attack first recovers α_t using the following equation:
 
-C)
+    s0 - s1 ≡ (Hm1 + r0 * α) / α_t - (Hm2 + r1 * α) / α_t (mod q)
+
+    Since r0 == r1: s0 - s1 ≡ (Hm1 + r0 * α) / α_t - (Hm2 + r0 * α) / α_t (mod q)
+
+    s0 - s1 ≡ (Hm1) / α_t - Hm2 / α_t (mod q)
+
+    α_t ≡ (Hm1 − Hm2) / (s0 - s1) (mod q)
+
+This will work as long as s0 != s1, which occurs at a very low probablity. Therefore,
+it then uses α_t to find the secret key α through this equation:
+
+    s0 ≡ (Hm1 + r0 * α) / α_t (mod q)
+
+    Rearrange that equation to get: α ≡ (s0 * α_t − Hm1) / r0 (mod q)
+
+C) Using the Birthday Paradox, if α_t is a random integer between 0 and 2^128
+each time the program is run, then the expect number of random α_t before we get 
+a repeat will be (2^128)^0.5 which is 2^64. This is a feasible number of tries for
+an effictient adversary to execute and if this repeat happens, the adversary can
+use the steps/equations described part A) to retrieve the key with constant probablity.
+This leads us to say that BadECDSA can have at most 64-bit security.
+
 
 Problem 3:
 
-A)
+A) Assuming a busy network operating at maximum capacity, the adversary will have to 
+wait (expected value):
+
+    Dataframe size (in bits) = 2312 * 8 = 18496
+    Throughput (in bits/sec) = 11 * 10^6
+    Dataframes per second = 11 * 10^6 / 18496 = 594.7
+    The Birthday Paradox tell us that the expected number of dataframe/tries before 
+        the IV repeats = (2^24) ^ 0.5 = 2^12
+    Wait time = 2^12 / 594.7 = 6.88 seconds
+
+to see two frames encrypted using the same IV. If instead we want to know how long it
+would take for an adversary to see a guaranteed repeat: 
+
+    (2^24+1)/594  = 28244 seconds = 7 hours and 51 minutes
+
+They can then xor the two encrypted messages and since the secret key will be the
+same (the xoring will get rid of a value repeated twice), we're left with the xor
+of the two messages that were sent those two different times.
 
 Extra Credit:
 

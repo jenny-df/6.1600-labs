@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Lab 1: Merkle trees | 6.1600 Labs</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Lab 1: Merkle trees" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Student lab assignments for MIT 6.1600" />
+<meta property="og:description" content="Student lab assignments for MIT 6.1600" />
+<link rel="canonical" href="http://61600-labs.csail.mit.edu/lab1.html" />
+<meta property="og:url" content="http://61600-labs.csail.mit.edu/lab1.html" />
+<meta property="og:site_name" content="6.1600 Labs" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Lab 1: Merkle trees" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Student lab assignments for MIT 6.1600","headline":"Lab 1: Merkle trees","url":"http://61600-labs.csail.mit.edu/lab1.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://61600-labs.csail.mit.edu/feed.xml" title="6.1600 Labs" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">6.1600 Labs</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Lab 1: Merkle trees</h1>
+  </header>
+
+  <div class="post-content">
+    <style type="text/css">
+ol { list-style-type: upper-alpha; }
+
+blockquote {
+  color: black;
+  background: white;
+  font-style: normal;
+  font-size: inherit;
+  border: 1px solid gray;
+  background-color: lightyellow;
+  padding: 1em;
+}
+</style>
+
+<hr />
+
+<p><strong>Instructions on how to submit Lab 1:</strong>
+Please download all the required files from the <a href="https://github.com/mit-pdos/6.1600-labs/tree/main/merkle/">lab1 github repo</a>.</p>
+
+<ul>
+  <li>
+    <p><strong>Code:</strong> Place your code answers in the template <a href="https://github.com/mit-pdos/6.1600-labs/tree/main/merkle/attack.py"><code class="language-plaintext highlighter-rouge">attack.py</code></a>.
+  Please include all code necessary to generate your solution in each of the respective methods. Do not just hard code working answers!</p>
+  </li>
+  <li>
+    <p><strong>Text:</strong> Answer the written questions in the <a href="https://www.gradescope.com/courses/844720/assignments/4917891">lab1 questions gradescope assignment</a>. There are both warm-up excercises and theory questions at the end of the lab.</p>
+  </li>
+</ul>
+
+<p>Upload <code class="language-plaintext highlighter-rouge">attack.py</code> to the <a href="https://www.gradescope.com/courses/844720/assignments/4918255">lab1 code gradescope assignment</a>.</p>
+
+<p><strong>Running the Lab on Windows</strong>
+<code class="language-plaintext highlighter-rouge">make check</code> and <code class="language-plaintext highlighter-rouge">make run-server</code> and <code class="language-plaintext highlighter-rouge">make venv</code> do not natively work on Windows.</p>
+
+<p>If you are using a windows machine, please see the <a href="https://github.com/mit-pdos/6.1600-labs/tree/main/merkle/windows-instructions.md">Windows Instructions</a>.</p>
+
+<p><strong>Gradescope autograder:</strong>
+Your code will be graded with the Gradescope autograder with a total timeout of 40 minutes.</p>
+
+<p>There is a STRICT 6.0GB memory limit on Gradescope. Reasonable solutions to this lab should not come close to approaching this memory limit.</p>
+
+<p><strong>Plagiarism:</strong> Gradescope automatically
+runs a surprisingly effective 
+plagiarism-detection tool on your
+submissions. Please do not copy code from your
+fellow students. Refer to the “Collaboration”
+section of the <a href="https://61600.csail.mit.edu/2023/handouts/info.pdf">course
+info</a>
+document for details on what types of
+collaboration are and aren’t allowed in 6.1600.
+If you are having trouble completing an assignment
+for whatever reason, <em>please</em> ask the course staff
+for help. We are often happy to give help and,
+in many cases, extensions too! 
+We are not happy when we find copied code.</p>
+
+<p><strong>Optional reference reading:</strong>
+The <a href="https://toc.cryptobook.us/book.pdf">Boneh-Shoup book, Chapter 8.9</a>
+presents a formal treatment of Merkle trees and authenticated data
+structures, if you would like a more detailed discussion of the ideas
+behind this lab assignment.</p>
+
+<hr />
+
+<blockquote>
+  <p><strong>WARNING:</strong> The code for this lab requires Python
+   3.10 or higher. (The code will not run with older versions of Python.)
+   Please make sure to upgrade before attempting to
+   run the code.</p>
+</blockquote>
+
+<p>In this lab assignment, you will attack an authenticated
+key-value store that uses Merkle trees.  The code is available in the
+<a href="https://github.com/mit-pdos/6.1600-labs/tree/main/merkle">lab1 github repo</a>.</p>
+
+<p>The key-value store consists of two parts: a <em>store</em> that stores
+key-value pairs, and a <em>client</em> that can perform get and put operations.
+The client can look up the current value of a key, or put a new value for
+a particular key.  The client doesn’t store the key-value pairs itself,
+and relies on the store for that purpose.  Importantly for this lab,
+though, the client tries to ensure that the store is behaving correctly,
+using a Merkle tree.</p>
+
+<h1 id="warm-up-exercises">Warm-up exercises</h1>
+
+<p>To get familiar with the key-value store used in this lab, experiment
+with it using the command-line interface.  Run <code class="language-plaintext highlighter-rouge">make venv</code> to set up
+the Python environment with the required packages.  Then, start the store
+server by running <code class="language-plaintext highlighter-rouge">make run-server</code>.  Finally, in another terminal, use
+<code class="language-plaintext highlighter-rouge">venv/bin/python cli.py</code> to issue put and get requrests to the server, like:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    % venv/bin/python cli.py get foo
+    % venv/bin/python cli.py get hello
+    % venv/bin/python cli.py put foo bar
+    % venv/bin/python cli.py put hello world
+    % venv/bin/python cli.py get foo
+    % venv/bin/python cli.py get hello
+    ...
+</code></pre></div></div>
+
+<p>Answer the following questions in the <a href="https://www.gradescope.com/courses/844720/assignments/4917891">gradescope assignment</a>:</p>
+
+<ol>
+  <li>
+    <p>When you restart the server (kill the running server and run
+  <code class="language-plaintext highlighter-rouge">make run-server</code> again), what happens to subsequent client lookups
+  (get operations)?  How does the client know that the server restarted?</p>
+
+    <p><em>Hint:</em> if you get the client and server in an inconsistent state after
+  restarting the server, you can use <code class="language-plaintext highlighter-rouge">venv/bin/python cli.py reset</code> to get yourself
+  back to a clean starting state again.</p>
+  </li>
+  <li>
+    <p>Why do subsequent client updates (put operations) fail to execute
+  after a server restart?  What would go wrong if they didn’t fail?</p>
+  </li>
+</ol>
+
+<h1 id="merkle-tree-implementation">Merkle tree implementation</h1>
+
+<p>For the rest of this lab assignment, you will need to understand the
+exact way in which our code authenticates key-value operations.
+The way the client authenticates the store’s responses is by constructing
+a tree of the current key-value mappings, and building a Merkle hash tree
+for that key-value tree.  An example Merkle tree is shown in this figure:</p>
+
+<p><img src="/merkle-tree.drawio.svg" alt="Merkle tree diagram" /></p>
+
+<p>You can see the code for this construction in
+<a href="https://github.com/mit-pdos/6.1600-labs/blob/main/merkle/common.py">common.py</a>.
+<code class="language-plaintext highlighter-rouge">A</code> is the root of the tree in the example diagram.  Each subtree (including
+the leaf nodes at the bottom, the intermediate nodes in the tree, and the root
+node) is represented by some byte string:</p>
+
+<ul>
+  <li>
+    <p>A leaf node with a single key-value pair, such as the <code class="language-plaintext highlighter-rouge">D</code>, <code class="language-plaintext highlighter-rouge">E</code>, and <code class="language-plaintext highlighter-rouge">F</code> nodes,
+is represented by <code class="language-plaintext highlighter-rouge">H_kv()</code> (the hash of the concatenation of the key and the
+value, such as the concatenation of <code class="language-plaintext highlighter-rouge">foo</code> and <code class="language-plaintext highlighter-rouge">bar</code> for the <code class="language-plaintext highlighter-rouge">D</code> node).</p>
+  </li>
+  <li>
+    <p>An intermediate tree node is represented by <code class="language-plaintext highlighter-rouge">H_internal()</code> (the hash of the
+concatenation of the left and right subtree representations).
+For instance, the <code class="language-plaintext highlighter-rouge">B</code> node is represented by the hash of the concatenation
+of the hashes for <code class="language-plaintext highlighter-rouge">D</code> and <code class="language-plaintext highlighter-rouge">E</code>, in that order, and <code class="language-plaintext highlighter-rouge">A</code> is the hash of
+the concatenation of the hashes for <code class="language-plaintext highlighter-rouge">B</code> and <code class="language-plaintext highlighter-rouge">C</code>.</p>
+  </li>
+  <li>
+    <p>An empty subtree is represented by <code class="language-plaintext highlighter-rouge">H_empty()</code> (an empty string).
+This shows up in cases when an internal node has only one child (e.g.,
+<code class="language-plaintext highlighter-rouge">C</code> has only a right child, so its left child is the empty subtree,
+represented by <code class="language-plaintext highlighter-rouge">H_empty()</code>).  A tree containing no elements has an
+empty root, so the root (and thus the entire tree) would be represented
+by <code class="language-plaintext highlighter-rouge">H_empty()</code>.</p>
+  </li>
+</ul>
+
+<p>The client stores the root value, and uses that to authenticate all
+operations on the tree.</p>
+
+<p>To find a given key-value pair, the client traverses the tree going
+left and right based on the hash of the key that it wants to find,
+<code class="language-plaintext highlighter-rouge">traversal_path(key)</code>, which is the hash of the <code class="language-plaintext highlighter-rouge">key</code>.  That is,
+each key has a specific place where it can be found in the tree.
+However, a tree does not need to be expanded all the way to the depth of
+<code class="language-plaintext highlighter-rouge">traversal_path()</code>, if there aren’t other keys with similar prefixes of
+their <code class="language-plaintext highlighter-rouge">traversal_path()</code>.  In our example tree diagram above, the high
+bit in the hash of <code class="language-plaintext highlighter-rouge">foo</code> and <code class="language-plaintext highlighter-rouge">baz</code> are both <code class="language-plaintext highlighter-rouge">0</code>, so they are both on the
+left side of the root.  The next-highest bit in the hash of <code class="language-plaintext highlighter-rouge">foo</code> is <code class="language-plaintext highlighter-rouge">0</code>
+and the same bit in the hash of <code class="language-plaintext highlighter-rouge">baz</code> is <code class="language-plaintext highlighter-rouge">1</code>, which is why <code class="language-plaintext highlighter-rouge">foo</code> is on
+the left of node <code class="language-plaintext highlighter-rouge">B</code>, and <code class="language-plaintext highlighter-rouge">baz</code> is on the right.  The high two bits of
+the hash of <code class="language-plaintext highlighter-rouge">abc</code> are both <code class="language-plaintext highlighter-rouge">1</code>, which is why it’s on the right side.
+There is no requirement for the tree to be in a minimal shape; for
+instance, the key-value pair for <code class="language-plaintext highlighter-rouge">abc</code> could have appeared in the <code class="language-plaintext highlighter-rouge">C</code>
+node, without expanding the tree down one more level.</p>
+
+<p>You can use the <code class="language-plaintext highlighter-rouge">--print-proofs</code> command to ask the client to explicitly
+print out the steps of proof verification, to help understand how the
+client authenticates the responses it gets from the store.  For example:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    % venv/bin/python cli.py reset
+    % venv/bin/python cli.py put foo bar
+    % venv/bin/python cli.py put hello world
+    % venv/bin/python cli.py --print-proofs get foo
+</code></pre></div></div>
+
+<p>Answer the following questions in the <a href="https://www.gradescope.com/courses/844720/assignments/4917891">gradescope assignment</a>:</p>
+
+<ol start="3">
+  <li>How long is the proof for <code class="language-plaintext highlighter-rouge">get foo</code> after you’ve inserted both
+  <code class="language-plaintext highlighter-rouge">foo=bar</code> and <code class="language-plaintext highlighter-rouge">hello=world</code> into the store, as in the above example?
+  Explain why that is.</li>
+</ol>
+
+<h1 id="attack-scenario-1-key-value-confusion">Attack scenario 1: Key-value confusion</h1>
+
+<p>For this and subsequent attack assignments, your job will be
+to find weaknesses in this authentication scheme.  You can look at
+<a href="https://github.com/mit-pdos/6.1600-labs/blob/main/merkle/client.py">client.py</a>
+and
+<a href="https://github.com/mit-pdos/6.1600-labs/blob/main/merkle/store.py">store.py</a>
+to understand how these two components work in detail.</p>
+
+<ol>
+  <li>
+    <p>Find a weakness in the authentication scheme that allows an adversarial
+  store to produce a fake key-value pair that will appear to be valid to a client
+  (i.e., get succeeds), after the client inserts just one valid key-value pair of
+  its own choice (<code class="language-plaintext highlighter-rouge">hello</code>, <code class="language-plaintext highlighter-rouge">world</code>).</p>
+
+    <p>We formalize this attack scenario in the code of <code class="language-plaintext highlighter-rouge">scenario_one()</code> in
+<a href="https://github.com/mit-pdos/6.1600-labs/blob/main/merkle/grader.py">grader.py</a>.
+The client inserts a key-value pair (<code class="language-plaintext highlighter-rouge">hello</code>, <code class="language-plaintext highlighter-rouge">world</code>), and then the client
+starts interacting with the adversarial store (<code class="language-plaintext highlighter-rouge">c._store = a</code>), and the adversary
+gets to supply a fake key of the adversary’s choice (<code class="language-plaintext highlighter-rouge">a.attack_fake_key()</code>).</p>
+
+    <p>Implement your attack by modifying <code class="language-plaintext highlighter-rouge">AttackOne</code> in <a href="https://github.com/mit-pdos/6.1600-labs/blob/main/merkle/attack.py">attack.py</a>. Run <code class="language-plaintext highlighter-rouge">make check</code> to check if your attack works.</p>
+  </li>
+</ol>
+
+<h1 id="attack-scenario-2-many-fake-key-value-pairs">Attack scenario 2: Many fake key-value pairs</h1>
+
+<p>Consider the scenario in <code class="language-plaintext highlighter-rouge">scenario_two()</code> of
+<a href="https://github.com/mit-pdos/6.1600-labs/blob/main/merkle/grader.py">grader.py</a>:
+the client inserts a single key-value pair of the adversary’s choice
+(<code class="language-plaintext highlighter-rouge">a.attack_key_value()</code>), and the adversary’s job is to make it so that
+many key-value lookups will then succeed on the client (all of the keys in
+<code class="language-plaintext highlighter-rouge">a.attack_fake_keys()</code> must appear to exist).</p>
+
+<ol>
+  <li>
+    <p>Find a weakness in the authentication scheme that allows an adversary to
+  mount an attack against scenario 2.</p>
+
+    <p>Implement your attack by modifying <code class="language-plaintext highlighter-rouge">AttackTwo</code> in <a href="https://github.com/mit-pdos/6.1600-labs/blob/main/merkle/attack.py">attack.py</a>. Run <code class="language-plaintext highlighter-rouge">make check</code> to check if your attack works.</p>
+  </li>
+</ol>
+
+<h1 id="attack-scenario-3-fake-proofs">Attack scenario 3: Fake proofs</h1>
+
+<p>Consider the scenario in <code class="language-plaintext highlighter-rouge">scenario_three()</code> of
+<a href="https://github.com/mit-pdos/6.1600-labs/blob/main/merkle/grader.py">grader.py</a>:
+the grader inserts many keys, <code class="language-plaintext highlighter-rouge">k0</code> through <code class="language-plaintext highlighter-rouge">k999</code>, into the store.
+Your job, in <code class="language-plaintext highlighter-rouge">AttackThree</code>, is to create fake proofs that convince the
+client that all of those keys are missing (i.e., <code class="language-plaintext highlighter-rouge">lookup()</code> should return
+<code class="language-plaintext highlighter-rouge">None</code>).  To make this attack slightly more challenging, and to also
+prepare you for the next attack, you must construct fake proofs with a
+single element in the <code class="language-plaintext highlighter-rouge">proof.siblings</code> list.</p>
+
+<ol>
+  <li>
+    <p>Find a weakness in the authentication scheme that allows an adversary to
+  mount an attack against scenario 3.</p>
+
+    <p>Implement your attack by modifying <code class="language-plaintext highlighter-rouge">AttackThree</code> in <a href="https://github.com/mit-pdos/6.1600-labs/blob/main/merkle/attack.py">attack.py</a>. Run <code class="language-plaintext highlighter-rouge">make check</code> to check if your attack works.</p>
+  </li>
+</ol>
+
+<h1 id="attack-scenario-4-insert-confusion-optional-extra-credit">Attack scenario 4: Insert confusion (Optional, extra credit)</h1>
+
+<p>Consider the scenario in <code class="language-plaintext highlighter-rouge">scenario_four()</code> of
+<a href="https://github.com/mit-pdos/6.1600-labs/blob/main/merkle/grader.py">grader.py</a>:
+the client inserts 1000 short key-value pairs of the client’s choice,
+while interacting with the adversary’s store.  (Previously all of
+the client inserts took place against the real key-value store.)
+The client then gets a key from the adversary, which should appear to
+exist (get succeeds), and the resulting key-value pair should be long
+(over 1000 bytes).</p>
+
+<p>It might be helpful to understand how the client checks proofs when doing
+an insert.  Use <code class="language-plaintext highlighter-rouge">cli.py</code> to experiment with this; for example:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    % venv/bin/python cli.py reset
+    % venv/bin/python cli.py --print-proofs put foo bar
+    % venv/bin/python cli.py --print-proofs put hello world
+    % venv/bin/python cli.py --print-proofs get hello
+
+    % venv/bin/python cli.py --print-proofs put abc def
+    % venv/bin/python cli.py --print-proofs get abc
+</code></pre></div></div>
+
+<p>What proof is being presented for each <code class="language-plaintext highlighter-rouge">put</code> operation?  How does the
+proof presented for <code class="language-plaintext highlighter-rouge">put hello world</code> compare with the proof presented for
+<code class="language-plaintext highlighter-rouge">get hello</code>?  What about for <code class="language-plaintext highlighter-rouge">abc</code>?  You don’t have to submit answers
+to these questions, but understanding how this works will likely help
+you implement the attack for scenario 4.</p>
+
+<ol>
+  <li>
+    <p>Find a weakness in the authentication scheme that allows an adversary to
+  mount an attack against scenario 4.</p>
+
+    <p>Implement your attack by modifying <code class="language-plaintext highlighter-rouge">AttackFour</code> in <a href="https://github.com/mit-pdos/6.1600-labs/blob/main/merkle/attack.py">attack.py</a>. Run <code class="language-plaintext highlighter-rouge">make check</code> to check if your attack works.</p>
+  </li>
+</ol>
+
+<h1 id="theory-questions">Theory Questions</h1>
+
+<p>Answer all of the theory questions on <a href="https://www.gradescope.com/courses/844720/assignments/4917891">gradescope</a>.</p>
+
+  </div>
+
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">6.1600 Labs</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">6.1600 Labs</li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>Student lab assignments for MIT 6.1600</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

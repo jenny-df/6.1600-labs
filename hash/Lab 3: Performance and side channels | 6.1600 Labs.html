@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Lab 3: Performance and side channels | 6.1600 Labs</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Lab 3: Performance and side channels" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Student lab assignments for MIT 6.1600" />
+<meta property="og:description" content="Student lab assignments for MIT 6.1600" />
+<link rel="canonical" href="http://61600-labs.csail.mit.edu/lab3.html" />
+<meta property="og:url" content="http://61600-labs.csail.mit.edu/lab3.html" />
+<meta property="og:site_name" content="6.1600 Labs" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Lab 3: Performance and side channels" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Student lab assignments for MIT 6.1600","headline":"Lab 3: Performance and side channels","url":"http://61600-labs.csail.mit.edu/lab3.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://61600-labs.csail.mit.edu/feed.xml" title="6.1600 Labs" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">6.1600 Labs</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Lab 3: Performance and side channels</h1>
+  </header>
+
+  <div class="post-content">
+    <style type="text/css">
+    ol { list-style-type: upper-alpha; }
+    ol ol { list-style-type: lower-roman; }
+
+blockquote {
+  color: black;
+  background: white;
+  font-style: normal;
+  font-size: inherit;
+  border: 1px solid gray;
+  background-color: lightyellow;
+  padding: 1em;
+}
+</style>
+
+<p><strong>Instructions on how to submit Lab 3:</strong>
+Please download all the required files from the <a href="https://github.com/mit-pdos/6.1600-labs/tree/main/timing/">lab3-timing github repo</a> and <a href="https://github.com/mit-pdos/6.1600-labs/tree/main/ssh/">lab3-ssh github repo</a>.</p>
+
+<ul>
+  <li>
+    <p><strong>Code:</strong> Place your code answers in the template <a href="https://github.com/mit-pdos/6.1600-labs/tree/main/bad-random/timing/attacker.py"><code class="language-plaintext highlighter-rouge">timing/attacker.py</code></a> for the Problem 2 and <a href="https://github.com/mit-pdos/6.1600-labs/tree/main/bad-random/ssh/attack.py"><code class="language-plaintext highlighter-rouge">ssh/attack.py</code></a> for problem 3.</p>
+  </li>
+  <li>
+    <p><strong>Text:</strong> Place your written answers in the template <a href="https://github.com/mit-pdos/6.1600-labs/tree/main/ssh/questions.txt"><code class="language-plaintext highlighter-rouge">questions.txt</code></a></p>
+  </li>
+</ul>
+
+<p>Upload (<code class="language-plaintext highlighter-rouge">timing/attacker.py</code>) to the <a href="https://www.gradescope.com/courses/533302/assignments/3517357/">lab3-timing gradescope assignment</a>.</p>
+
+<p>Upload (<code class="language-plaintext highlighter-rouge">ssh/attack.py</code>, <code class="language-plaintext highlighter-rouge">questions.txt</code>) to the <a href="https://www.gradescope.com/courses/533302/assignments/3517367/">lab3-ssh gradescope assignment</a>.</p>
+
+<p><strong>Running the Lab on Windows</strong>
+<code class="language-plaintext highlighter-rouge">make check</code> and <code class="language-plaintext highlighter-rouge">make venv</code> do not natively work on Windows.</p>
+
+<p>If you are using a windows machine, please see the <a href="https://github.com/mit-pdos/6.1600-labs/tree/main/merkle/windows-instructions.md">Windows Instructions</a>.</p>
+
+<p><strong>Gradescope autograder:</strong>
+Your code will be graded with the Gradescope autograder with a total timeout of 40 minutes.</p>
+
+<p>There is a STRICT 6.0GB memory limit on Gradescope. Reasonable solutions to this lab should not come close to approaching this memory limit.</p>
+
+<h2 id="problem-1-performance">Problem 1: Performance</h2>
+
+<p>In this problem, you will get some hands-on
+experience with the performance characteristics of
+different cryptographic algorithms.</p>
+
+<p>For this lab, you will need access to a machine
+with OpenSSL installed. The Athena machines will
+work well for this if you don’t have a convenient
+local environment to use.
+To test whether you are on a machine with OpenSSL,
+run the shell command <code class="language-plaintext highlighter-rouge">openssl version</code>. You
+should see some output like this:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ openssl version
+OpenSSL 3.0.7 1 Nov 2022 (Library: OpenSSL 3.0.7 1 Nov 2022)
+</code></pre></div></div>
+
+<p>Now, run <code class="language-plaintext highlighter-rouge">openssl help</code>. It should display some
+output like this:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ openssl help
+help:
+
+Standard commands
+asn1parse         ca                ciphers           cmp
+cms               crl               crl2pkcs7         dgst
+dhparam           dsa               dsaparam          ec
+ecparam           enc               engine            errstr
+fipsinstall       gendsa            genpkey           genrsa
+help              info              kdf               list
+mac               nseq              ocsp              passwd
+pkcs12            pkcs7             pkcs8             pkey
+pkeyparam         pkeyutl           prime             rand
+rehash            req               rsa               rsautl
+s_client          s_server          s_time            sess_id
+smime             speed             spkac             srp
+storeutl          ts                verify            version
+x509
+
+Message Digest commands (see the `dgst' command for more details)
+blake2b512        blake2s256        md4               md5
+mdc2              rmd160            sha1              sha224
+sha256            sha3-224          sha3-256          sha3-384
+sha3-512          sha384            sha512            sha512-224
+sha512-256        shake128          shake256          sm3
+
+Cipher commands (see the `enc' command for more details)
+aes-128-cbc       aes-128-ecb       aes-192-cbc       aes-192-ecb
+aes-256-cbc       aes-256-ecb       aria-128-cbc      aria-128-cfb
+aria-128-cfb1     aria-128-cfb8     aria-128-ctr      aria-128-ecb
+aria-128-ofb      aria-192-cbc      aria-192-cfb      aria-192-cfb1
+aria-192-cfb8     aria-192-ctr      aria-192-ecb      aria-192-ofb
+aria-256-cbc      aria-256-cfb      aria-256-cfb1     aria-256-cfb8
+aria-256-ctr      aria-256-ecb      aria-256-ofb      base64
+bf                bf-cbc            bf-cfb            bf-ecb
+bf-ofb            camellia-128-cbc  camellia-128-ecb  camellia-192-cbc
+camellia-192-ecb  camellia-256-cbc  camellia-256-ecb  cast
+cast-cbc          cast5-cbc         cast5-cfb         cast5-ecb
+cast5-ofb         des               des-cbc           des-cfb
+des-ecb           des-ede           des-ede-cbc       des-ede-cfb
+des-ede-ofb       des-ede3          des-ede3-cbc      des-ede3-cfb
+des-ede3-ofb      des-ofb           des3              desx
+idea              idea-cbc          idea-cfb          idea-ecb
+idea-ofb          rc2               rc2-40-cbc        rc2-64-cbc
+rc2-cbc           rc2-cfb           rc2-ecb           rc2-ofb
+rc4               rc4-40            seed              seed-cbc
+seed-cfb          seed-ecb          seed-ofb          sm4-cbc
+sm4-cfb           sm4-ctr           sm4-ecb           sm4-ofb
+zlib
+</code></pre></div></div>
+
+<p>You can see benchmark each of the message-digest
+and cipher algorithms listed here by running
+<code class="language-plaintext highlighter-rouge">openssl speed &lt;ALG_NAME&gt;</code>. For example <code class="language-plaintext highlighter-rouge">openssl
+speed rc4</code> will give you performance numbers for
+the RC4 block cipher.</p>
+
+<p>A few additional algorithms not listed above are:</p>
+
+<ul>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">rsa1024</code>, <code class="language-plaintext highlighter-rouge">rsa2048</code>, <code class="language-plaintext highlighter-rouge">rsa4096</code> – RSA keypair
+generation and signing</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">ecdh</code> – Elliptic-curve Diffie-Hellman key
+exchange</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">dsa</code> – The digital signature algorithm,
+working over the integers modulo a prime p</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">ecsda</code> – Elliptic-curve digital signature
+algorithm</p>
+  </li>
+</ul>
+
+<p>In addition, the following command runs AES
+encryption using hardware acceleration (if your
+machine supports it), with a 256-bit key in Galois
+counter mode:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>openssl speed -evp aes-256-gcm
+</code></pre></div></div>
+
+<p>The command <code class="language-plaintext highlighter-rouge">openssl genrsa 4096</code> will generate
+a 4096-bit keypair.</p>
+
+<p>The command <code class="language-plaintext highlighter-rouge">openssl speed -help</code> will give you
+more options that you can pass to the <code class="language-plaintext highlighter-rouge">speed</code>
+command.</p>
+
+<h1 id="questions">Questions</h1>
+
+<ol>
+  <li>
+    <p>You are designing a file-storage application
+that requires computing a MAC over large
+files. You have the option between using
+HMAC-SHA256 and AES-128-GMAC. Both of these
+MACs give 128-bit security. Which has
+better performance for encrypting &gt;1MB files?
+(You may have to do a little bit of research
+on the design of both of these primitives to 
+come up with a good answer.)</p>
+  </li>
+  <li>
+    <p>Your boss tells you that to protect against
+quantum computers, your company will have to
+switch from using AES-128 encryption to
+AES-256 encryption. Roughly how much longer
+will it take to encrypt a 100MB file after
+increasing the key size? Explain why
+in at most three sentences.</p>
+  </li>
+  <li>
+    <p>MIT has asked you to redesign the software on
+the MIT certificate authority (CA). They are
+deciding between using RSA, DSA, and ECDSA
+signatures.</p>
+
+    <ol>
+      <li>
+        <p>What is the minimum keylength you must
+use for each of these three 
+signature algorithms to achieve 128-bit
+security under the best-known attacks today?</p>
+
+        <p>Answer the following sub-questions
+assuming that you use key sizes for each algorithm
+that achieve 128-bit security.</p>
+      </li>
+      <li>
+        <p>Which of these three algorithms is
+fastest/slowest for signing?</p>
+      </li>
+      <li>
+        <p>Which of these three algorithms is
+fastest/slowest for signature verification?</p>
+      </li>
+      <li>
+        <p>Which of these three algorithms is
+fastest/slowest for keypair generation?
+(You should be able to infer the
+answer to this question from the
+output of the <code class="language-plaintext highlighter-rouge">openssl</code> commands given above.)</p>
+      </li>
+    </ol>
+  </li>
+  <li>
+    <p>MIT’s Touchstone authentication service allows
+users to authenticated using a username and
+password. Which password-hashing function would you use 
+for storing hashed passwords on the server?
+Explain why in at most three sentences.</p>
+  </li>
+</ol>
+
+<h2 id="problem-2-timing-side-channel-attack">Problem 2: Timing side-channel attack</h2>
+
+<p>In this problem you will mount your own attack to
+extract a secret password from a server using an
+insecure authentication scheme.</p>
+
+<p>The code for this assignment is in <a href="https://github.com/mit-pdos/6.1600-labs/tree/main/timing"><code class="language-plaintext highlighter-rouge">timing</code></a>.</p>
+
+<h1 id="scenario">Scenario</h1>
+
+<p>Bob runs a payments service that, after Bob
+authenticates by sending a password to the server,
+runs the <code class="language-plaintext highlighter-rouge">send_money</code> routine to process
+a payment. (In this toy example, <code class="language-plaintext highlighter-rouge">send_money</code> is
+a no-op.)</p>
+
+<p>In a secure implementation, Bob’s server would use
+a robust off-the-shelf authenticated transport
+protocol (SSH, TLS 1.3 with pre-shared keys,
+etc.). But since Bob has not taken 6.1600 yet, he
+cooked up his own ad-hoc authentication protocol.</p>
+
+<p>Bob’s server accepts requests from the network,
+where each request contains a password. Bob’s
+server checks the request’s password against
+the true password and calls the <code class="language-plaintext highlighter-rouge">send_money</code>
+function only if the passwords match.</p>
+
+<h1 id="more-specifically">More specifically</h1>
+
+<p>On initialization, a <code class="language-plaintext highlighter-rouge">BadServer</code> instance generates a secret password using fresh randomness and saves it as a hexadecimal string i.e., one with characters from <code class="language-plaintext highlighter-rouge">0</code> to <code class="language-plaintext highlighter-rouge">9</code> or <code class="language-plaintext highlighter-rouge">a</code> to <code class="language-plaintext highlighter-rouge">f</code>. Note <strong>two</strong> hexadecimal characters represent one byte of data.</p>
+
+<p>The <code class="language-plaintext highlighter-rouge">BadServer</code> allows any user to submit a <code class="language-plaintext highlighter-rouge">VerifyRequest</code> with some password.
+The server responds with a <code class="language-plaintext highlighter-rouge">VerifyResponse</code>, which contains a single boolean value.
+This value is <code class="language-plaintext highlighter-rouge">True</code> if the password in the request matches the server’s secret.
+Otherwise, the value is <code class="language-plaintext highlighter-rouge">False</code>.</p>
+
+<p>Implementation errors make it possible for you, the attacker, to violate this property.
+In particular, software side channels (specifically, timing side channels) foil Bob’s attempt to achieve this property.</p>
+
+<h1 id="your-job">Your job</h1>
+
+<p>Your job is to implement <code class="language-plaintext highlighter-rouge">steal_password</code> in <a href="https://github.com/mit-pdos/6.1600-labs/tree/main/timing/attacker.py"><code class="language-plaintext highlighter-rouge">timing/attacker.py</code></a> to steal the secret password from the server.</p>
+
+<p>Timing side channels have nondeterministic behavior.
+Thus, while we have provided an autograder to help you develop your solution locally, <strong>you will need it to submit your solution to our autograder on Gradescope to receive an accurate evaluation.</strong></p>
+
+<p>In particular,</p>
+<ul>
+  <li>The autograder will test whether you can extract passwords of different lengths.  The length <strong>in bytes</strong> is the <code class="language-plaintext highlighter-rouge">l</code> parameter to <code class="language-plaintext highlighter-rouge">steal_password</code>.</li>
+  <li>Every test will wait 20 minutes for the attacker to extract the secret password.  Your attack must complete by this time (or the autograder will reject it).</li>
+  <li>Your attack must not crash or fail (or the autograder will reject it).</li>
+  <li>To compute your final grade, the autograder will only be run a limited number of times per student.  Make sure that your attack succeeds with a comfortably-high probability.</li>
+</ul>
+
+<p>Finally, you must not access private variables of
+the <code class="language-plaintext highlighter-rouge">BadServer</code> instance.</p>
+
+<h2 id="problem-3-ssh-security">Problem 3: SSH Security</h2>
+
+<p>In this problem, you will mount two 
+different attacks on a real SSH implementation.
+The SSH client and server are built with the very
+slick <a href="https://github.com/paramiko/paramiko"><code class="language-plaintext highlighter-rouge">paramiko</code></a> library.</p>
+
+<p>The starter code for this assignment is in 
+<a href="https://github.com/mit-pdos/6.1600-labs/tree/main/ssh"><code class="language-plaintext highlighter-rouge">ssh</code></a>.</p>
+
+<p>You will have to implement two functions in
+<a href="https://github.com/mit-pdos/6.1600-labs/blob/main/ssh/attack.py"><code class="language-plaintext highlighter-rouge">ssh/attack.py</code></a>.
+You should not change any of the other file – we
+will grade your solution against fresh copies of these files.</p>
+
+<h1 id="getting-started">Getting started</h1>
+
+<p>Run <code class="language-plaintext highlighter-rouge">make venv</code> to set up your development
+environment.</p>
+
+<h1 id="running-the-server">Running the server</h1>
+
+<p>Run <code class="language-plaintext highlighter-rouge">venv/bin/python server.py</code> to start the ssh server.</p>
+
+<p>If everything works, you should see the following 
+message:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Listening for connection ...
+</code></pre></div></div>
+
+<p>To run the grader, <em>open a new shell</em> (separate
+from the shell that is running the server) and run:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>venv/bin/python grader.py
+</code></pre></div></div>
+
+<p>It might be helpful for you to enable paramiko’s
+debug-level log messages. The following lines of 
+code will enable logging:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import logging
+
+logging.basicConfig()
+logging.getLogger("paramiko").setLevel(logging.DEBUG)
+</code></pre></div></div>
+
+<h1 id="part-a-compress-then-encrypt">Part (a): Compress then encrypt</h1>
+
+<p>The SSH protocol supports compression: the client
+first compresses the data it wants to send to the
+server, and then the client encrypts it.
+In this problem, you will see how an attacker can
+abuse compress-then-encrypt to decrypt encrypted traffic.
+This attack works against real SSH implementations.</p>
+
+<p>The code in <code class="language-plaintext highlighter-rouge">grade_decrypt</code> of
+<a href="https://github.com/mit-pdos/6.1600-labs/blob/main/ssh/grader.py"><code class="language-plaintext highlighter-rouge">ssh/grader.py</code></a>
+chooses the names of three capital cities at
+random and puts them into a JSON object like this:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{
+"city0": "Victoria, Seychelles",
+"city1": "Seoul, South Korea",
+"city2": "Paris, France",
+}
+</code></pre></div></div>
+<p>The grader stores this object in a string called
+<code class="language-plaintext highlighter-rouge">secret</code>, and then sends it via SSH to the SSH server.</p>
+
+<p>As the attacker in this problem, you are able to
+somehow convince the SSH client to send a string
+<code class="language-plaintext highlighter-rouge">evil</code> of your choosing alongside the string <code class="language-plaintext highlighter-rouge">secret</code>.
+So the string that the SSH client sends to the
+server is actually <code class="language-plaintext highlighter-rouge">evil+secret</code>.
+(This scenario can occur in a number of contexts.
+On the web, for example, a malicious website can trick a client
+into sending HTTPS requests that combine
+attacker-controlled fields with client secrets.)</p>
+
+<p><strong>Your task:</strong>
+You must implement the function <code class="language-plaintext highlighter-rouge">attack_decrypt</code> in
+<a href="https://github.com/mit-pdos/6.1600-labs/blob/main/ssh/attack.py"><code class="language-plaintext highlighter-rouge">ssh/attack.py</code></a>.
+Your code may call <code class="language-plaintext highlighter-rouge">client_fn</code> many times as:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(bytes_out, bytes_in) = client_fn("evil string")
+</code></pre></div></div>
+<p>This instructs the SSH client to send the string
+<code class="language-plaintext highlighter-rouge">"evil string" + secret</code> to the SSH server over
+the encrypted channel. The function returns the
+number of bytes sent to the server (<code class="language-plaintext highlighter-rouge">bytes_out</code>)
+and bytes received from the server (<code class="language-plaintext highlighter-rouge">bytes_in</code>)
+during the client-server interaction.</p>
+
+<p>Your job is to recover the string <code class="language-plaintext highlighter-rouge">secret</code>
+exactly.</p>
+
+<p><strong>NOTE:</strong> Your attack does not need to succeed
+with probability 1. It is good enough if your
+attack works with probability 10% or so – as 
+long as you can convince the grader to accept
+your solution.</p>
+
+<h1 id="part-b-tampering-with-packets">Part (b): Tampering with packets</h1>
+<p>A <a href="https://datatracker.ietf.org/doc/html/rfc4253#section-6">standard SSH implementation</a> applies
+a MAC to each SSH-protocol packet.
+In this part, you will attack a <em>broken</em>
+implementation of SSH that does not use MACs at all.
+(More precisely, our implementation uses a MAC that always
+outputs a 160-bit string of zeros.
+The code for this no-op MAC is in <a href="https://github.com/mit-pdos/6.1600-labs/blob/main/ssh/opts.py"><code class="language-plaintext highlighter-rouge">ssh/opts.py</code></a>.)</p>
+
+<p>The code in <code class="language-plaintext highlighter-rouge">grade_tamper</code> of
+<a href="https://github.com/mit-pdos/6.1600-labs/blob/main/ssh/grader.py"><code class="language-plaintext highlighter-rouge">ssh/grader.py</code></a>
+starts an SSH client, connects to the SSH server,
+and sends the shell command <code class="language-plaintext highlighter-rouge">ls ./file/*</code> to the server.</p>
+
+<p><strong>Your task:</strong> You will play the role of an
+in-network attacker that tampers with the SSH packets
+as they flow from the client to the server.
+Your task is to cause the server to receive the
+shell command <code class="language-plaintext highlighter-rouge">rm -r /</code>, instead of the command
+that the client intended to send..</p>
+
+<p>In particular, you must implement the function
+<code class="language-plaintext highlighter-rouge">AttackTamper.handle_data</code> in <a href="https://github.com/mit-pdos/6.1600-labs/blob/main/ssh/attack.py"><code class="language-plaintext highlighter-rouge">ssh/attack.py</code></a>.
+The grader code will invoke your <code class="language-plaintext highlighter-rouge">handle_data</code>
+function each time the SSH client sends data 
+to the SSH server. The function takes as input the
+raw bytes of the data that the SSH client sent and it outputs
+whatever bytes the attacker wants to relay to the SSH server.
+If you want to save state across invocations of
+<code class="language-plaintext highlighter-rouge">handle_data</code>, you can store it as members of <code class="language-plaintext highlighter-rouge">AttackTamper</code>.
+(That is, <code class="language-plaintext highlighter-rouge">handle_data</code> can set <code class="language-plaintext highlighter-rouge">self.blah = 7</code> to
+store the value of <code class="language-plaintext highlighter-rouge">blah</code>.)</p>
+
+<p><a href="https://github.com/mit-pdos/6.1600-labs/tree/ssh/server.py#L78">If the SSH server receives</a> 
+the special string <code class="language-plaintext highlighter-rouge">rm -r /</code>,
+it will reply to the client with a special message
+that the grader will use to determine that your
+attack has worked.</p>
+
+<p>You may find it helpful to read a bit about the
+SSH protocol in <a href="https://datatracker.ietf.org/doc/html/rfc4253">RFC 4253</a>
+and <a href="https://datatracker.ietf.org/doc/html/rfc4254">RFC 4254</a>,
+though you should not need to go very deep into
+either to complete the problem.</p>
+
+<h1 id="part-c-extra-credit">Part (c): <em>Extra credit</em></h1>
+
+<p>Repeat the attack of Part (b), except that now you 
+must mount the attack against an SSH client that
+uses packet compression.</p>
+
+
+  </div>
+
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">6.1600 Labs</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">6.1600 Labs</li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>Student lab assignments for MIT 6.1600</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

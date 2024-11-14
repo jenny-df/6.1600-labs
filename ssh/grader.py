@@ -24,7 +24,6 @@ def grade_decrypt():
         return c.run_client(prefix + secret, compress=True)
 
     guess = attack.attack_decrypt(run_client)
-
     if secret != guess:
         raise ValueError("Bad guess")
 

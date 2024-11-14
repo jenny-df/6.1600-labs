@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Lab 2: Bad randomness | 6.1600 Labs</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Lab 2: Bad randomness" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Student lab assignments for MIT 6.1600" />
+<meta property="og:description" content="Student lab assignments for MIT 6.1600" />
+<link rel="canonical" href="http://61600-labs.csail.mit.edu/lab2.html" />
+<meta property="og:url" content="http://61600-labs.csail.mit.edu/lab2.html" />
+<meta property="og:site_name" content="6.1600 Labs" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Lab 2: Bad randomness" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Student lab assignments for MIT 6.1600","headline":"Lab 2: Bad randomness","url":"http://61600-labs.csail.mit.edu/lab2.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://61600-labs.csail.mit.edu/feed.xml" title="6.1600 Labs" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">6.1600 Labs</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Lab 2: Bad randomness</h1>
+  </header>
+
+  <div class="post-content">
+    <script id="MathJax-script" async="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style type="text/css">
+    ol { list-style-type: lower-alpha; }
+    ol ol { list-style-type: circle; }
+</style>
+
+<p><strong>Instructions on how to submit Lab 2:</strong>
+Please download all the required files from the <a href="https://github.com/mit-pdos/6.1600-labs/tree/main/bad-random/">lab2 github repo</a>.</p>
+
+<ul>
+  <li>
+    <p><strong>Problem 0:</strong> Please complete the True/False questions in the <a href="https://www.gradescope.com/courses/533302/assignments/3287458/">lab2-problem0 gradescope assignment</a>.</p>
+  </li>
+  <li>
+    <p><strong>Code:</strong> Place your code answers in the template <a href="https://github.com/mit-pdos/6.1600-labs/tree/main/bad-random/ecdsa/sol.py"><code class="language-plaintext highlighter-rouge">ecdsa/sol.py</code></a> for ecdsa questions and <a href="https://github.com/mit-pdos/6.1600-labs/tree/main/bad-random/wep/attacker.py"><code class="language-plaintext highlighter-rouge">wep/attacker.py</code></a>.
+  Please include all code necessary to generate your solution in each of the respective methods. Do not just hard code working answers!</p>
+  </li>
+  <li>
+    <p><strong>Text:</strong> Place your written answers in the template <a href="https://github.com/mit-pdos/6.1600-labs/tree/main/bad-random/questions.txt"><code class="language-plaintext highlighter-rouge">questions.txt</code></a></p>
+  </li>
+</ul>
+
+<p>Upload all files (<code class="language-plaintext highlighter-rouge">sol.py</code>, <code class="language-plaintext highlighter-rouge">attacker.py</code>, <code class="language-plaintext highlighter-rouge">questions.txt</code>) to the <a href="https://www.gradescope.com/courses/533302/assignments/3287458/">lab2 gradescope assignment</a>.</p>
+
+<p><strong>Running the Lab on Windows</strong>
+<code class="language-plaintext highlighter-rouge">make check</code> and <code class="language-plaintext highlighter-rouge">make venv</code> do not natively work on Windows.</p>
+
+<p>If you are using a windows machine, please see the <a href="https://github.com/mit-pdos/6.1600-labs/tree/main/merkle/windows-instructions.md">Windows Instructions</a>.</p>
+
+<p><strong>Gradescope autograder:</strong>
+Your code will be graded with the Gradescope autograder with a total timeout of 40 minutes.</p>
+
+<p>There is a STRICT 6.0GB memory limit on Gradescope. Reasonable solutions to this lab should not come close to approaching this memory limit.</p>
+
+<p><strong>Plagiarism:</strong> Gradescope automatically
+runs a surprisingly effective 
+plagiarism-detection tool on your
+submissions. Please do not copy code from your
+fellow students. Refer to the “Collaboration”
+section of the <a href="https://61600.csail.mit.edu/2023/handouts/info.pdf">course
+info</a>
+document for details on what types of
+collaboration are and aren’t allowed in 6.1600.
+If you are having trouble completing an assignment
+for whatever reason, <em>please</em> ask the course staff
+for help. We are often happy to give help and,
+in many cases, extensions too! 
+We are not happy when we find copied code.</p>
+
+<h1 id="problem-0-truefalse">Problem 0: True/False</h1>
+
+<p>Please complete the True/False questions in the <a href="https://www.gradescope.com/courses/533302/assignments/3287458/">lab2-problem0 gradescope assignment</a>.</p>
+
+<p>For these problems, let \(F \colon \{0,1\}^n \times \{0,1\}^n \to \{0,1\}^n\) 
+be a pseudorandom function. Let \(n \approx 256\) be the security parameter.</p>
+
+<ol>
+  <li>
+    <p>The function \(F'(k) := F(k, 0)\) must be
+a one-way function.</p>
+  </li>
+  <li>
+    <p>The function \(F'(k) := F(0, k)\) must be
+a one-way function.</p>
+  </li>
+  <li>
+    <p>The function \(F'(k) := F(k, 0) \| k\) 
+must be a one-way function.</p>
+  </li>
+  <li>
+    <p>A one-way function must be collision
+resistant.</p>
+  </li>
+  <li>
+    <p>If \(\mathsf{MAC}(k,m)\) is a secure MAC, then
+\(\mathsf{MAC}(k,m)\) must be a pseudorandom function.</p>
+  </li>
+  <li>
+    <p>The function \(\mathsf{MAC}(k,m) := F(k,m)\)
+is a secure MAC with message space \(\{0,1\}^n\).</p>
+  </li>
+  <li>
+    <p>The function \(\mathsf{MAC}(k,m) := F(k,\textbf{0}^{n-1}\|m)\)
+is a secure MAC with message space \(\{0,1\}\),
+where \(\textbf{0}^{n-1}\) is a string of \(n-1\) zeros.</p>
+  </li>
+  <li>
+    <p>The function \(\mathsf{MAC}(k,m) := k \oplus m\)
+is a secure MAC.</p>
+  </li>
+  <li>
+    <p>Let \(H \colon \{0,1\}^* \to \{0,1\}^\ell\) be a collision-resistant hash function.
+There is a collision-finding attack on \(H\) that runs in time roughly \(2^{\ell/2}\).</p>
+  </li>
+  <li>
+    <p>If \(\Sigma\) is a secure digital signature
+scheme (using the definition from lecture), then 
+\(\Sigma\) remains secure even if an adversary can
+obtain many signatures on messages of its
+choice.</p>
+  </li>
+  <li>
+    <p>If \(\Sigma\) is a secure digital signature
+scheme (using the definition from lecture), then 
+\(\Sigma\) remains secure even if an adversary can
+obtain half of the bits of the secret signing key.</p>
+  </li>
+  <li>
+    <p>It is possible to use the ``hash-and-sign’’
+paradigm with Lamport signatures.</p>
+  </li>
+  <li>
+    <p>The RSA full-domain-hash signature scheme is
+proven secure under the RSA assumption and
+the assumption that the hash function is
+collision reistant.</p>
+  </li>
+  <li>
+    <p>A Lamport signature on an \(n\) bit message
+requires \(\lambda^2 n\) bits to represent, 
+where \(\lambda\) is the output length of
+the one-way function.</p>
+  </li>
+  <li>
+    <p>There are in principle efficient
+(polynomial-time) attacks
+that break all known one-way functions on 
+a quantum computer.</p>
+  </li>
+  <li>
+    <p>There are in principle efficient
+(polynomial-time) attacks
+that break RSA on a quantum computer.</p>
+  </li>
+</ol>
+
+<h1 id="problem-1-bad-randomness-in-key-generation">Problem 1: Bad randomness in key generation</h1>
+
+<p>The file
+<a href="https://github.com/mit-pdos/6.1600-labs/tree/main/bad-random/ecdsa/keygen.py"><code class="language-plaintext highlighter-rouge">ecdsa/keygen.py</code></a>
+generates an ECDSA signing keypair and prints the
+resulting public key to standard output.</p>
+
+<ol>
+  <li>
+    <p>The public keys generated using this script
+are insecure, in the sense that it is possible
+to recover the secret signing key given only the
+public verification key.</p>
+
+    <p>Your task is to write a program, <code class="language-plaintext highlighter-rouge">problem_1a</code> in <code class="language-plaintext highlighter-rouge">sol.py</code>,
+that:</p>
+
+    <ul>
+      <li>
+        <p>takes a date (formatted as
+<code class="language-plaintext highlighter-rouge">YYYY-MM-DD</code>) as a single command-line argument,</p>
+      </li>
+      <li>
+        <p>reads a public key, generated by 
+<code class="language-plaintext highlighter-rouge">ecdsa/keygen.py</code>, from standard input, and</p>
+      </li>
+      <li>
+        <p>outputs the corresponding secret key, formatted as
+a base-10 integer.</p>
+      </li>
+    </ul>
+
+    <p>For example, on August 16, 2023 we generated a key…</p>
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ python keygen.py &gt; key.txt
+-----BEGIN PUBLIC KEY-----
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEQfbUYzbQUiQWHcOtcmf/cVr+ygHI
+hs560RKiVUV0gqm4OyNLB+HCSf8c7mGzxDuuid8z3RkdXC9vw1e6tDuSRg==
+-----END PUBLIC KEY-----
+</code></pre></div>    </div>
+
+    <p>Later on, we should be able to use <code class="language-plaintext highlighter-rouge">problem_1a</code> to
+recover the secret key…</p>
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ with open('key.txt', 'r') as file:
+$   print(problem_1a("2023-08-16", VerifyingKey.from_pem(file.read())))
+
+88928882924258032953987945121779605092553192944307381616887680985059143398985
+</code></pre></div>    </div>
+
+    <p>Run <code class="language-plaintext highlighter-rouge">make check</code> to test your solution.</p>
+
+    <p><em>Hint:</em> Your program should not require more than a few
+minutes of compute time.</p>
+
+    <p><em>Hint:</em> If you are running on a multicore machine, 
+use as many cores as you can!</p>
+  </li>
+  <li>
+    <p>Your friend proposes instead reading <code class="language-plaintext highlighter-rouge">N</code> bytes
+of randomness from <code class="language-plaintext highlighter-rouge">/dev/random</code> and using 
+these bytes as the seed used to generate a 
+256-bit ECDSA keypair.</p>
+
+    <p>For which values of <code class="language-plaintext highlighter-rouge">N</code> is this approach secure?
+ (Indicate all that apply.)</p>
+
+    <ul>
+      <li>
+        <p>4 bytes</p>
+      </li>
+      <li>
+        <p>16 bytes</p>
+      </li>
+      <li>
+        <p>32 bytes</p>
+      </li>
+      <li>
+        <p>256 bytes</p>
+      </li>
+    </ul>
+  </li>
+</ol>
+
+<h1 id="problem-2-bad-randomness-in-ecdsa">Problem 2: Bad randomness in ECDSA</h1>
+
+<p>ECDSA is one of the most widely used
+digital-signature schemes.
+ECDSA is a randomized signature scheme;
+generating each ECDSA signature requires
+the signer to sample a fresh random signing nonce.</p>
+
+<p>See Chapter 19.3 of <a href="https://toc.cryptobook.us/book.pdf">Boneh-Shoup book</a>
+for a detailed description of ECDSA.
+You should think of an ECDSA signature as being
+computed as:</p>
+
+<p>\(s \gets(H(m) + f(g^{\alpha_\text{t}}) \cdot \alpha)/\alpha_\text{t} \in \mathbb{Z}_q\),</p>
+
+<p>where:</p>
+
+<ul>
+  <li>
+    <p>\(q \in \mathbb{Z}\) is a fixed 256-bit prime,</p>
+  </li>
+  <li>
+    <p>\(m \in \{0,1\}^*\) is the message to be signed,</p>
+  </li>
+  <li>
+    <p>\(H\colon \{0,1\}^* \to \mathbb{Z}_q\) is a hash
+function,</p>
+  </li>
+  <li>
+    <p>\(g\) is the generator of and order-\(q\) group
+\(\mathbb{G}\),</p>
+  </li>
+  <li>
+    <p>\(\alpha_\text{t} \in \mathbb{Z}_q\) is the
+signing nonce,</p>
+  </li>
+  <li>
+    <p>\(\alpha \in \mathbb{Z}_q\) is the signer’s
+secret key, and</p>
+  </li>
+  <li>
+    <p>\(f \colon \mathbb{G} \to \mathbb{Z}_q\) is
+some function fixed in the ECDSA standard.</p>
+  </li>
+</ul>
+
+<p>Throughout this problem, we assume that ECDSA 
+signatures are always computed using the P256
+elliptic curve, where the order \(q\) is a 256-bit
+integer.</p>
+
+<ol>
+  <li>
+    <p>Say that an attacker can obtain two valid
+ECDSA signatures \((r_0, s_0)\), \((r_1, s_1)\)
+that were generated using the same secret key
+\(\alpha\) and signing nonce \(\alpha_\text{t}\).</p>
+
+    <p>Show how an attacker can use these signatures
+to recover the signer’s secret key \(\alpha\).
+In particular, write an expression for \(\alpha\) 
+in terms of the other quantities.</p>
+
+    <p><em>Hint:</em> Your attack should not need to use
+any properties of elliptic curves.</p>
+
+    <p><em>Hint:</em> Appendix A.2 of the Boneh-Shoup book
+has helpful background about arithmetic modulo \(q\).</p>
+  </li>
+  <li>
+    <p>Write a program, in <code class="language-plaintext highlighter-rouge">problem_2b()</code> that takes as input two ECDSA signatures,
+signed using the same nonce, the hashes of the two messages signed, and outputs the signer’s secret key.</p>
+
+    <p>The input to problem_2b will be two tuple signatures (in the form <code class="language-plaintext highlighter-rouge">(r,s)</code>) as well as <code class="language-plaintext highlighter-rouge">H(m1)</code> and <code class="language-plaintext highlighter-rouge">H(m2)</code> (converted to an integer) for example:</p>
+
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sig1 = (3373270495537608166420301124031645059552155087339817978895, 
+4866115514576831317719439267655910857343196914135233616904)
+
+sig2 = (3373270495537608166420301124031645059552155087339817978895,
+1026436076375142414773366823398026947727009880581933863772)
+
+Hm1 = 549937035807590235590408220127762782653536091071
+Hm2 = 111625161468258865202361239710433310078751980605
+</code></pre></div>    </div>
+    <p>Each <code class="language-plaintext highlighter-rouge">(r,s)</code> pair is one ECDSA signature. 
+The order <code class="language-plaintext highlighter-rouge">q</code> of the NIST curve is listed here for your
+convenience.</p>
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>q=6277101735386680763835789423176059013767194773182842284081
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>In the ECDSA specification, \(\alpha_\text{t}\)
+is a uniformly random integer in the range
+\(\{1, 2, 3, \dots, q-1\}\), where \(q \approx 2^{256}\)
+is the group order.
+Since ECDSA in this setting is only supposed to provide
+128-bit security, you might think that it
+would be safe to instead sample the signing nonce
+\(\alpha_\text{t}\) as a random number in the range
+\(\{1, \dots, 2^{128}\}\).
+Call this modified system “BadECDSA”.</p>
+
+    <p>Show that after an attacker obtains \(2^{64}\)
+BadECDSA signatures, it can recover the
+signer’s secret key with constant probability.
+Therefore BadECDSA can have at most 64-bit security.</p>
+  </li>
+</ol>
+
+<h1 id="problem-3-security-issues-in-the-wep-encryption-scheme">Problem 3: Security issues in the WEP encryption scheme</h1>
+
+<p>The early versions of wifi used the WEP standard
+to encrypt wireless network traffic.
+In this problem, we will explore a few weaknesses of the WEP standard.</p>
+
+<p>WEP encrypts each packet (“data frame”) using
+the RC4 stream cipher. Given a secret key \(k\),
+the RC4 cipher generates a long sequence of
+pseudorandom bytes – the “keystream”. To encrypt a message
+we XOR these bytes with the message. To decrypt,
+we XOR these bytes with the ciphertext.</p>
+
+<ol>
+  <li>
+    <p>For the RC4 secret key, the WEP endpoints use
+a long-term secret (typically of 40 or 104
+bits), concatenated with a 24-bit random
+initialization vector (IV).
+The long-term secret is fixed – it is the 
+wifi password – but the IV changes with each
+data frame.</p>
+
+    <p>Each 802.11b data frame is at most 2312 bytes
+and an 802.11b network has a theoretical
+maximum throughput of 11 megabits per second.
+Roughly how long will an attacker have to wait
+to see two frames encrypted using the same IV,
+assuming a busy network operating at maximum
+capacity?</p>
+
+    <p>What information can an attacker learn when 
+this occurs?</p>
+  </li>
+  <li>
+    <p>WEP uses an insecure “hash-then-encrypt”
+scheme for integrity protection. In
+particular, the sender sends the 
+RC4 encryption of \((m \| \text{Hash}(m))\)
+to the recipient. To check message integrity,
+the recipient decrypts the frame to get \((m \| h)\)
+and accepts the packet if \(\text{Hash}(m) = h\).</p>
+
+    <p>Show that if the attacker intercepts a data
+frame containing the encryption of a known
+plaintext \(m\), the attacker can trick the 
+recipient into accepting a message (of length
+\(|m|\)) of the attacker’s choosing.</p>
+
+    <p>Implement your attack as <code class="language-plaintext highlighter-rouge">attack_one</code> in
+<a href="https://github.com/mit-pdos/6.1600-labs/tree/main/bad-random/wep/attacker.py"><code class="language-plaintext highlighter-rouge">wep/attacker.py</code></a>.
+The precise encryption scheme used by WEP is
+implemented by <code class="language-plaintext highlighter-rouge">send_packet()</code> in <a href="https://github.com/mit-pdos/6.1600-labs/tree/main/bad-random/wep/victim.py"><code class="language-plaintext highlighter-rouge">wep/victim.py</code></a>.</p>
+  </li>
+  <li>
+    <p>WEP uses the CRC32 non-cryptographic hash 
+function to compute the message-integrity hash.</p>
+
+    <p>The CRC32 hash function has the property that 
+\(\text{CRC32}(x) \oplus \text{CRC32}(y) \oplus \text{CRC32}(z) = \text{CRC32}(x \oplus y \oplus z)\).
+Explain how an attacker can abuse this property 
+to XOR bytes of its choice into
+a WEP-encrypted data frame, <em>even without knowing</em>
+the message that the frame encrypts.</p>
+
+    <p>Implement your attack as <code class="language-plaintext highlighter-rouge">attack_two</code> in
+<a href="https://github.com/mit-pdos/6.1600-labs/tree/main/bad-random/wep/attacker.py"><code class="language-plaintext highlighter-rouge">wep/attacker.py</code></a>.</p>
+  </li>
+  <li>
+    <p><em>Extra credit (challenging)</em>: A WEP recipient who receives a data frame with
+an invalid integrity hash will complain, while
+a recipient who receives a valid data frame
+will not. Explain how an attacker can use this
+information to extract the entire contents of
+an encrypted frame.</p>
+
+    <p>Implement your attack as <code class="language-plaintext highlighter-rouge">attack_three</code> in
+<a href="https://github.com/mit-pdos/6.1600-labs/tree/main/bad-random/wep/attacker.py"><code class="language-plaintext highlighter-rouge">wep/attacker.py</code></a>.</p>
+
+    <p><em>Hint</em>: Think about resizing the packet that
+the attacker intercepts.</p>
+
+    <p><em>Hint</em>: The fastest attack will exploit some
+structural properties of the CRC32 checksum.
+You will have to do some research to figure it
+out.</p>
+  </li>
+</ol>
+
+<h1 id="extra-credit-bad-randomness-in-gmac">Extra credit: Bad randomness in GMAC</h1>
+
+<p>Read Chapter 9.7 of <a href="https://toc.cryptobook.us/book.pdf">Boneh-Shoup book</a>,
+which is about the AES-GCM mode of operation.
+AES is by far the most widely used cipher today
+and GCM is a popular modern mode of operation,
+used in TLS 1.3 and many other places.</p>
+
+<p>This problem will demonstrate that bad randomness
+is catastrophic for AES-GCM: if the sender of a
+message reuses an encryption nonce even once, an
+attacker can break the CCA security of the
+encryption scheme.</p>
+
+<ol>
+  <li>
+    <p>Say that an attacker intercepts a GCM
+ciphertext \((c,t)\) and is somehow able
+to obtain the GHASH key \(k_\text{m}\)
+used to generate this ciphertext.</p>
+
+    <p>Explain how the attacker can use its knowledge
+of \(k_\text{m}\) to break the CCA security of
+AES-GCM.</p>
+  </li>
+  <li>
+    <p>Say that an attacker intercepts a pair of
+distinct GCM ciphertexts \((c_0, t_0)\) and \((c_1, t_1)\),
+both encrypted with the <em>same secret key</em> and
+the <em>same 96-bit encryption nonce</em> \(\mathcal{N}\).
+Show how the attacker can recover the GHASH key
+\(k_\text{m}\) from these two ciphertext pairs.</p>
+
+    <p><em>Hint:</em> The function GHASH is defined using arithmetic
+in \(GF(2^{128})\), but you can think of GHASH
+as using arithmetic modulo a 128-bit prime \(p\).
+In this setting, all of the “nice” algebraic properties hold:
+a polynomial of degree \(d &lt; p\) has at most \(d\) distinct roots
+(and there is an efficient algorithm to find them),
+every element has an additive and multiplicative inverse, etc.</p>
+  </li>
+  <li>
+    <p>Propose one way to modify AES-GCM so that this
+integrity attack is not possible, even if the sender reuses
+the nonce.
+In one sentence, speculate on why the GCM designers did not incorporate
+your fix into their design.</p>
+  </li>
+</ol>
+
+  </div>
+
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">6.1600 Labs</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">6.1600 Labs</li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>Student lab assignments for MIT 6.1600</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

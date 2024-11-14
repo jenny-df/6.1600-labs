@@ -56,7 +56,7 @@ class Client:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.connect(("localhost", constants.PORT))
             b = SocketWrapper(s, self.handle_send)
-
+ 
             client = paramiko.SSHClient()
             client.set_missing_host_key_policy(AcceptPolicy())
             client.connect(hostname = 'localhost',

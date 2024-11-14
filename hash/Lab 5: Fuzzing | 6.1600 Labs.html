@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Lab 5: Fuzzing | 6.1600 Labs</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Lab 5: Fuzzing" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Student lab assignments for MIT 6.1600" />
+<meta property="og:description" content="Student lab assignments for MIT 6.1600" />
+<link rel="canonical" href="http://61600-labs.csail.mit.edu/lab5.html" />
+<meta property="og:url" content="http://61600-labs.csail.mit.edu/lab5.html" />
+<meta property="og:site_name" content="6.1600 Labs" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Lab 5: Fuzzing" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Student lab assignments for MIT 6.1600","headline":"Lab 5: Fuzzing","url":"http://61600-labs.csail.mit.edu/lab5.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://61600-labs.csail.mit.edu/feed.xml" title="6.1600 Labs" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">6.1600 Labs</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Lab 5: Fuzzing</h1>
+  </header>
+
+  <div class="post-content">
+    <style type="text/css">
+    ol { list-style-type: upper-alpha; }
+</style>
+
+<p>In this lab assignment, you will use fuzzing
+to find bugs and make code more robust.  The
+starter code that you will be working with is available at
+<a href="https://github.com/mit-pdos/6.1600-labs/tree/main/fuzz">https://github.com/mit-pdos/6.1600-labs/tree/main/fuzz</a>,
+and you will also be using the <a href="https://github.com/google/atheris">Atheris fuzzer for Python</a>.</p>
+
+<h2 id="problem-1-finding-bugs">Problem 1: Finding bugs</h2>
+
+<p>We have written a buggy library that implements the
+<a href="https://github.com/msgpack/msgpack/blob/master/spec.md">MessagePack</a>
+encoding format.  MessagePack is similar to JSON, in that it allows
+encoding basic data types (integers, booleans, dictionaries, lists/tuples,
+etc), and does not require a pre-defined schema for the data that you
+want to encode.  Our buggy library is available as
+<a href="https://github.com/mit-pdos/6.1600-labs/blob/main/fuzz/msgpacker.py"><code class="language-plaintext highlighter-rouge">msgpacker.py</code></a>
+in the starter code repo.  You can see how to use this library in
+<a href="https://github.com/mit-pdos/6.1600-labs/blob/main/fuzz/msgpacker_example.py"><code class="language-plaintext highlighter-rouge">msgpacker_example.py</code></a>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    % python msgpacker_example.py
+    example: {'Hello': 'world', 'foo': ('bar', 'baz', 'quux'), 'flag': True, 'count': 123}
+    encoding: b'\x84\xa5Hello\xa5world\xa3foo\x93\xa3bar\xa3baz\xa4quux\xa4flag\xc2\xa5count{'
+    example2: {'Hello': 'world', 'foo': ('bar', 'baz', 'quux'), 'flag': True, 'count': 123}
+    % 
+</code></pre></div></div>
+
+<p>What you can see is that we constructed the <code class="language-plaintext highlighter-rouge">example</code> data structure,
+which is a dictionary containing lists/tuples, booleans, strings,
+and integers.  The second line is the MessagePack encoding of that value,
+and the last line shows <code class="language-plaintext highlighter-rouge">example2</code>, the decoding of the encoding; it is
+identical to the <code class="language-plaintext highlighter-rouge">example</code> data structure that what we started with.</p>
+
+<p>Your job is to find and fix bugs in this library.  We will test it
+against our own test cases, but we will not hand out these test cases
+to you upfront.  Instead, your job is to gain confidence that your
+fixed library is correct before you submit it for grading.  Correctness
+means correctly implementing the MessagePack specification; you can
+use the Python <a href="https://pypi.org/project/msgpack/"><code class="language-plaintext highlighter-rouge">msgpack</code> library</a>
+as a reference implementation of MessagePack.  (You can omit implementing
+support for floats, which we’ve omitted from our <code class="language-plaintext highlighter-rouge">msgpacker.py</code> library.)</p>
+
+<p>We think that fuzzing is likely to be a productive way of
+finding bugs in the <code class="language-plaintext highlighter-rouge">msgpacker.py</code> library.  You can use the
+<a href="https://github.com/google/atheris">Atheris fuzzer</a>.  To set
+up an environment containing this fuzzer library, you can run <code class="language-plaintext highlighter-rouge">make</code>,
+which sets up a corresponding virtualenv:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    % make
+    python3 -m venv venv
+    venv/bin/pip install -r requirements.txt || ( rm -r venv; false )
+    Collecting atheris
+      Using cached atheris-2.2.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (31.4 MB)
+    Collecting msgpack
+      Using cached msgpack-1.0.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (325 kB)
+    Installing collected packages: msgpack, atheris
+    Successfully installed atheris-2.2.2 msgpack-1.0.5
+    touch venv
+    % ./venv/bin/python ...
+</code></pre></div></div>
+
+<p>We also installed the standard <code class="language-plaintext highlighter-rouge">msgpack</code> library for Python, which you
+can use as needed in your fuzzing process.</p>
+
+<p>Submit your fixed <code class="language-plaintext highlighter-rouge">msgpacker.py</code> library, along with any fuzzing code
+that you’ve written as a way of showing your work.</p>
+
+<h2 id="problem-2-building-a-codec">Problem 2: Building a codec</h2>
+
+<p>Your job for the second part of the lab is to build a codec for bytestrings.
+That is, you will implement a pair of functions, <code class="language-plaintext highlighter-rouge">encode()</code> and <code class="language-plaintext highlighter-rouge">decode()</code>,
+that will take bytestrings (<code class="language-plaintext highlighter-rouge">bytes</code> in Python) as input, and produce bytestrings
+as output.  The reason you’re building a custom codec is that we would like to
+encode strings in a specific way:</p>
+
+<ul>
+  <li>
+    <p>Your codec must encode bytes into bytes, and decode back into bytes.</p>
+  </li>
+  <li>
+    <p>Your codec must be able to encode arbitrary bytes.  It must be possible
+to encode any byte sequence, and then decode it correctly (i.e.,
+get back the original input).</p>
+  </li>
+  <li>
+    <p>The encoding must be printable.  That is, regardless of what bytes your
+<code class="language-plaintext highlighter-rouge">encode()</code> function is asked to encode, the result must be a sequence
+of bytes that are all printable—so that you can, say, print it on
+a piece of paper and give it to someone, or print it on a billboard,
+etc.  Specifically, by <em>printable</em> we mean the bytes in Python’s
+<code class="language-plaintext highlighter-rouge">string.printable[:94]</code> (i.e., excluding whitespace).
+Your encodings cannot contain non-printable bytes.</p>
+  </li>
+  <li>
+    <p>Alphanumeric inputs (where every character is in <code class="language-plaintext highlighter-rouge">string.ascii_letters</code>
+or <code class="language-plaintext highlighter-rouge">string.digits</code>) must be encoded one-to-one: the encoding must be the
+same as the input.  This ensures that messages that are already printable,
+like “Apples”, are encoded as-is to “Apples”.</p>
+  </li>
+  <li>
+    <p>The encoding should not be too long, even if there are arbitrary input bytes.
+Specifically, the encoding can be at most 3x the size of the input, in the worst case.</p>
+  </li>
+  <li>
+    <p>The encoding must be recoverable.  This means that, if you take an encoding
+and chop off some parts of it (at the beginning or at the end), then
+decoding that chopped part should produce the corresponding part of
+the original string, modulo things that might have gotten cut off at
+each end.  For an encoding of a large input, if you chop off a few bytes
+from the beginning and/or the end of the encoding, you should get back
+most of the original data back when decoding it, but perhaps missing
+a little bit from the beginning and/or end, respectively.  Note that
+decoding of a chopped-off encoding should always produce a substring
+of the original input; the decoding should never contain garbage data.</p>
+  </li>
+</ul>
+
+<p>Your job is to implement this codec.  We have
+provided a skeleton file for you to get started,
+<a href="https://github.com/mit-pdos/6.1600-labs/blob/main/fuzz/codec.py"><code class="language-plaintext highlighter-rouge">codec.py</code></a>.
+We do not supply any test cases for you to use; feel free to use any
+tools available at your disposal, such as the Atheris fuzzer, to gain
+confidence that your codec is correct.  We will grade it with our own
+test cases when you submit your solution.  Submit your <code class="language-plaintext highlighter-rouge">codec.py</code>, along
+with any fuzz test cases that you used in developing it as a way of showing
+your work.</p>
+
+  </div>
+
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">6.1600 Labs</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">6.1600 Labs</li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>Student lab assignments for MIT 6.1600</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
