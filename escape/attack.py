@@ -13,6 +13,9 @@ def attack_three():
     return b'my "random" string'
 
 def attack_four():
+    # could also look through gc but i couldn't get my gc to find the old 
+    # SecretStore object with the secret... all the ones it found didn't 
+    # have a secret attribute
     class _Hash():
         def __init__(self,_):
             pass

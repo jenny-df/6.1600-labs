@@ -1,0 +1,6 @@
+mkdir f_at_depth1
+mkdir f_at_depth1/f_at_depth2
+fd_open f_at_depth1/f_at_depth2
+mv f_at_depth1/f_at_depth2 f_secretly_at_depth2
+fd_openat 4 ../../secret.txt
+fd_read 5

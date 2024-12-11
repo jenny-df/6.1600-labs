@@ -1,0 +1,2 @@
+ln -s ../secret.txt secret_symlink.txt
+cat secret_symlink.txt
